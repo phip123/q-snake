@@ -4,10 +4,14 @@ from typing import Tuple
 
 
 class Direction(Enum):
-    UP = (1, (0, -1))
-    RIGHT = (2, (1, 0))
-    DOWN = (3, (0, 1))
-    LEFT = (4, (-1, 0))
+    UP = (0, (0, -1))
+    RIGHT = (1, (1, 0))
+    DOWN = (2, (0, 1))
+    LEFT = (3, (-1, 0))
+    UP_RIGHT = (4, (1, 1))
+    DOWN_RIGHT = (5, (1, -1))
+    DOWN_LEFT = (6, (-1, -1))
+    UP_LEFT = (7, (-1, 1))
 
     def __init__(self, value: int, direction_vector: Tuple[int, int]):
         self.direction_vector = direction_vector
@@ -28,12 +32,15 @@ class Position:
         return Position(x=x, y=y)
 
     @staticmethod
-    def random(n,m):
-        x = random.randint(0, n-1)
-        y = random.randint(0, m-1)
+    def random(n, m):
+        x = random.randint(0, n - 1)
+        y = random.randint(0, m - 1)
         return Position(x=x, y=y)
 
     def __eq__(self, other):
         if isinstance(other, Position):
             return self.x == other.x and self.y == other.y
         return False
+
+    def __str__(self):
+        return f'x: {self.x}, y: {self.y}'
