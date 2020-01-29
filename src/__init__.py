@@ -8,12 +8,14 @@ class Direction(Enum):
     RIGHT = (1, (1, 0))
     DOWN = (2, (0, 1))
     LEFT = (3, (-1, 0))
-    UP_RIGHT = (4, (1, 1))
-    DOWN_RIGHT = (5, (1, -1))
-    DOWN_LEFT = (6, (-1, -1))
-    UP_LEFT = (7, (-1, 1))
+    # UP_RIGHT = (4, (1, 1))
+    # DOWN_RIGHT = (5, (1, -1))
+    # DOWN_LEFT = (6, (-1, -1))
+    # UP_LEFT = (7, (-1, 1))
 
     def __init__(self, value: int, direction_vector: Tuple[int, int]):
+        super().__init__()
+        self.key = value
         self.direction_vector = direction_vector
 
     def delta(self):

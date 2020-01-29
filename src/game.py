@@ -42,10 +42,10 @@ class Game:
             self.game_map.set(pos, 1)
         self.fruit = self.place_fruit()
 
-    def step(self, action: Direction):
+    def step(self, action: Direction) -> int:
         new_pos = self.position.move(action)
         if new_pos.x < 0 or new_pos.y < 0 or new_pos.x >= self.game_map.n or new_pos.y >= self.game_map.m:
-            return False
+            return -1
         else:
             if self.fruit == new_pos:
                 # eat
@@ -53,9 +53,10 @@ class Game:
                 self.game_map.set(new_pos, len(self.snake))
                 self.position = new_pos
                 self.fruit = self.place_fruit()
+                return 1
             elif new_pos in self.snake:
                 # snake eats itself
-                return False
+                return -1
             else:
                 # move
                 self.game_map.set(new_pos, len(self.snake))
@@ -68,7 +69,7 @@ class Game:
                 self.snake.reverse()
                 self.snake.pop()
                 self.snake.reverse()
-            return True
+                return 0
 
     def place_fruit(self, pos: Position = None):
         if pos is None:

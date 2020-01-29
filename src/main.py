@@ -4,7 +4,7 @@ from src.game import Game, GameMap
 
 if __name__ == '__main__':
     map = GameMap(4,4)
-    game = Game(map, [Position(x=1,y=2)],234)
+    game = Game(map, [Position(x=0,y=0)],234)
     print(game.step(Direction.RIGHT))
     game.print()
     distances = calculate_distances(game)

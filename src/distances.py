@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from typing import Optional, List
 
@@ -11,14 +12,24 @@ class Distances:
     wall: List[int]
     body: List[int]
 
+    def __hash__(self) -> int:
+        a = self.food.copy()
+        a.extend(self.wall)
+        a.extend(self.body)
+        hash = 0
+        l = len(a) - 1
+        for i in range(len(a)):
+            potency = l - i
+            hash += math.pow(a[i], potency)
+        return int(hash)
+
 
 def calculate_distances(game: Game) -> Distances:
     food = []
     wall = []
     body = []
     head_pos = game.snake[len(game.snake) - 1]
-    print(head_pos)
-    no_collision_indicator = -2
+    no_collision_indicator = game.game_map.n
     for direction in Direction:
         food_symbol = -1
         distance = calculate_distance(head_pos, game.game_map, food_symbol, direction)
