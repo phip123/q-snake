@@ -1,7 +1,8 @@
+import random
 from dataclasses import dataclass
 from itertools import product
 from time import sleep
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import numpy as np
 
@@ -23,7 +24,7 @@ class Table:
             possible_numbers.extend(range(n))
             perms1 = list(product(possible_numbers, repeat=4))
             possible_states = len(perms1) ** 3
-            self.q_table = np.random.rand(int(possible_states), 4)
+            self.q_table = np.ones((int(possible_states),4))
             self.index = 0
             self.lookup_map = dict()
 
@@ -64,13 +65,16 @@ def save_table(table: Table):
         f.write(f'{str(table.n)}\n')
 
 
-def load_table() -> Table:
-    q_table = np.load('model.npy')
-    lookup = np.load('lookup.npy', allow_pickle=True).item()
-    with open('model-info.txt', 'r') as f:
-        index = int(f.readline())
-        n = int(f.readline())
-    return Table(n, q_table=q_table, lookup=lookup, index=index)
+def load_table() -> Optional[Table]:
+    try:
+        q_table = np.load('model.npy')
+        lookup = np.load('lookup.npy', allow_pickle=True).item()
+        with open('model-info.txt', 'r') as f:
+            index = int(f.readline())
+            n = int(f.readline())
+        return Table(n, q_table=q_table, lookup=lookup, index=index)
+    except:
+        return None
 
 
 def take_action(state: Distances, table: Table) -> Direction:
@@ -100,6 +104,7 @@ class QLearningSettings:
     learning_rate: float
     discount_factor: float
     episodes: int
+    epsilon: float
     current_episode: int
 
 
@@ -118,25 +123,36 @@ def update_state(action: Direction, table: Table, settings: QLearningSettings, g
         estimated_future_value=estimated_future_value
     )
     table.set_value(old_state, action, update)
-    return reward != -1
+    return reward >= 0
 
 
 def start_training(game: Game, table: Table, settings: QLearningSettings) -> Table:
     current_episode = 0
+    highest_score = -1
     while current_episode < settings.episodes:
         current_state = calculate_distances(game)
         best_action = take_action(current_state, table)
+        if random.random() < settings.epsilon:
+            random_action = random.randint(0, 3)
+            best_action = list(Direction)[random_action]
         success = update_state(best_action, table, settings, game)
         if not success:
+            score = len(game.snake)
+            print(f'Score: {score}')
             print(f'Epsiode: {current_episode + 1}')
-            game = Game(game.game_map, [Position(x=0, y=0)])
+            if highest_score < score:
+                highest_score = score
+            start = Position.random(game.game_map.n, game.game_map.n)
+            game = Game(game.game_map, [start])
             current_episode += 1
+    print(f'Highest Score: {highest_score}')
     return table
 
 
 def test_table(table: Table, n: int):
     map = GameMap(n, n)
-    game = Game(map, [Position(x=0, y=0)])
+    game = Game(map, [Position.random(n, n)])
+    # game = Game(map, [Position.random(n, n)])
     while True:
         print('Current State')
         game.print()
@@ -145,25 +161,29 @@ def test_table(table: Table, n: int):
         print(f'Action: {best_action}')
         result = game.step(best_action)
         print(f'Result of move: {result}')
-        if result == -1:
+        if result < 0:
             print('Game over')
             return
-        sleep(3)
+        sleep(2)
 
 
 def main():
     n = 4
     settings = QLearningSettings(
-        learning_rate=0.5,
-        discount_factor=0.2,
-        episodes=100,
+        learning_rate=0.8,
+        discount_factor=0.5,
+        episodes=1000,
+        epsilon=0.0001,
         current_episode=0
     )
 
     map = GameMap(n, n)
-    game = Game(map, [Position(x=0, y=0)])
-    table = Table(n)
+    game = Game(map, [Position(0,0)])
+    table = load_table()
+    if table is None:
+        table = Table(n)
     table = start_training(game, table, settings)
+    # save_table(table)
     test_table(table, n)
 
 

@@ -34,7 +34,7 @@ class GameMap:
 
 class Game:
     def __init__(self, game_map: GameMap, snake: List[Position], seed=time.time()):
-        random.seed(seed)
+        # random.seed(seed)
         self.game_map = game_map
         self.snake = snake
         self.position = self.snake[0]
@@ -53,7 +53,7 @@ class Game:
                 self.game_map.set(new_pos, len(self.snake))
                 self.position = new_pos
                 self.fruit = self.place_fruit()
-                return 1
+                return 3
             elif new_pos in self.snake:
                 # snake eats itself
                 return -1
@@ -69,7 +69,7 @@ class Game:
                 self.snake.reverse()
                 self.snake.pop()
                 self.snake.reverse()
-                return 0
+                return 0.0000001
 
     def place_fruit(self, pos: Position = None):
         if pos is None:
@@ -77,7 +77,6 @@ class Game:
 
         while pos in self.snake:
             pos = Position.random(self.game_map.n, self.game_map.m)
-
         self.game_map.set(pos, -1)
         return pos
 
